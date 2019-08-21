@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.IO;
 
 namespace GameOfLife
 {
@@ -818,6 +819,113 @@ namespace GameOfLife
                 seed = input.GetSeed();
             }
             fromCurrentSeedToolStripMenuItem_Click(sender, e);
+        }
+
+        // Save As in File Menu
+        private void saveAsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SaveFileDialog saveAs = new SaveFileDialog();
+            saveAs.Filter = "All Files|*.*|Cells|*.Cells";
+            saveAs.FilterIndex = 2;
+            saveAs.DefaultExt = "Cells";
+
+            if (DialogResult.OK == saveAs.ShowDialog())
+            {
+                StreamWriter writer = new StreamWriter(saveAs.FileName);
+                writer.WriteLine("!This is a test");
+
+                for (int y = 0; y < universe.GetLength(1); y++)
+                {
+                    string thisRow = string.Empty;
+
+                    for (int x = 0; x < universe.GetLength(0); x++)
+                    {
+                        if (universe[x, y] == true)
+                        {
+                            thisRow += "&";
+                        }
+                        else if (universe[x, y] == false)
+                        {
+                            thisRow += ".";
+                        }
+                    }
+
+                    writer.WriteLine(thisRow);
+                }
+
+                writer.Close();
+            }
+        }
+
+        // Open in File Menu
+        private void openToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog open = new OpenFileDialog();
+            open.Filter = "All Files|*.*|Cells|*.Cells";
+            open.FilterIndex = 2;
+            
+            if (DialogResult.OK == open.ShowDialog())
+            {
+                StreamReader reader = new StreamReader(open.FileName);
+
+                int maxWidth = 0;
+                int maxHeight = 0;
+
+                while (!reader.EndOfStream)
+                {
+                    string row = reader.ReadLine();
+
+                    if (row[0] == '!')
+                    {
+                        continue;
+                    }
+
+                    else
+                    {
+                        maxHeight++;
+                    }
+
+                    if (maxWidth != maxHeight)
+                    {
+                        maxWidth = maxHeight;
+                    }
+                }
+
+                universe = new bool[maxWidth, maxHeight];
+                scratchPad = new bool[maxWidth, maxHeight];
+
+                reader.BaseStream.Seek(0, SeekOrigin.Begin);
+
+                int yPos = 0;
+
+                while (!reader.EndOfStream)
+                {
+                    string row = reader.ReadLine();
+
+                    if (row[0] != '!')
+                    {
+                        continue;
+                    }
+                    for (int xPos = 0; xPos < row.Length; xPos++)
+                    {
+                        if (row[xPos] == '&')
+                        {
+                            universe[xPos, yPos] = true;
+                        }
+                        else if (row[xPos] == '.')
+                        {
+                            universe[xPos, yPos] = false;
+                        }
+                    }
+                    
+
+                    yPos++;
+                }
+
+                reader.Close();
+            }
+
+            graphicsPanel1.Invalidate();
         }
     }
 }

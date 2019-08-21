@@ -113,7 +113,7 @@
         #endregion
 
         private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.NumericUpDown Scale;
+        private new System.Windows.Forms.NumericUpDown Scale;
         private System.Windows.Forms.Button Randomize;
         private System.Windows.Forms.Button button2;
         private System.Windows.Forms.Button button3;
