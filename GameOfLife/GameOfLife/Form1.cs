@@ -10,7 +10,7 @@ using System.Windows.Forms;
 
 namespace GameOfLife
 {
-    /* THINGS TO FINISH FOR MILESTONE!!!
+    /* COMPLETED STUFF!!
        
         1) Finish neighborCount function --- COMPLETED!!
         2) Set up buttons: --- COMPLETED!!
@@ -24,7 +24,30 @@ namespace GameOfLife
            C -- Living cells with 2 or 3 living neighbors live in the next generation
            D -- Dead cells with exactly 3 living neighbors live in the next generation
         4) Fix grid --- COMPLETED!!!
-     */  
+        5) Emptying universe --- COMPLETED!!!
+        6) Show current generation strip --- COMPLETED!!!
+        7) Display neighbor count in each cell --- COMPLETED!!!
+
+                TO-DO STUFF
+
+        Basics
+        1) Randomizing the universe
+        2) Saving current universe to a text file
+        3) USE VS VERSION CONTROL (GIT)
+        4) Open previously savd universe
+        5) Show current number of living cells
+        6) Controlling how many milliseconds between new generations
+        7) Controlling current size of the universe
+        8) View Menu Items (toggle on/off neighbor count, grid and HUD
+
+        Advanced
+        1) Importaning patterns from Life Lexicon
+        2) Game Colors
+        3) Universe Boundary behavior
+        4) Context sensitive menu
+        5) HUD
+        6) Settings (universe size, timer interval, color options, reload, reset)
+     */
 
     public partial class Form1 : Form
     {
