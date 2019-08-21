@@ -78,6 +78,9 @@ namespace GameOfLife
         // Generation count
         int generations = 0;
 
+        // Randomize the seed
+        int seed = 0;
+
         public Form1()
         {
             InitializeComponent();
@@ -669,7 +672,8 @@ namespace GameOfLife
             Environment.Exit(0);
         }
 
-        // New button (Makes universe empty)
+        /*
+        // Accidental copy for New in File Menu
         private void newToolStripMenuItem_Click(object sender, EventArgs e)
         {
             for (int y = 0; y < universe.GetLength(1); y++)
@@ -689,6 +693,7 @@ namespace GameOfLife
 
             graphicsPanel1.Invalidate();
         }
+        */
 
         // Next button
         private void toolStripButtonNext_Click(object sender, EventArgs e)
@@ -713,6 +718,7 @@ namespace GameOfLife
             timer.Enabled = true;
         }
 
+        // New button on strip (Empties universe)
         private void newToolStripButton_Click(object sender, EventArgs e)
         {
             for (int y = 0; y < universe.GetLength(1); y++)
@@ -733,6 +739,7 @@ namespace GameOfLife
             graphicsPanel1.Invalidate();
         }
 
+        // New in File Menu (Empties universe)
         private void newToolStripMenuItem_Click_1(object sender, EventArgs e)
         {
             for (int y = 0; y < universe.GetLength(1); y++)
@@ -751,6 +758,66 @@ namespace GameOfLife
             timer.Enabled = false;
 
             graphicsPanel1.Invalidate();
+        }
+
+        // Randomize From Time
+        private void fromTimeToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Random randTime = new Random();
+            int time;
+
+            for (int x = 0; x < universe.GetLength(0); x++)
+            {
+                for (int y = 0; y < universe.GetLength(1); y++)
+                {
+                    time = randTime.Next() % 4;
+                    if (time == 0)
+                    {
+                        universe[x, y] = true;
+                    }
+                    else
+                    {
+                        universe[x, y] = false;
+                    }
+                }
+            }
+            graphicsPanel1.Invalidate();
+        }
+
+        // Randomize Current Seed
+        private void fromCurrentSeedToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Random randCurrent = new Random(seed);
+            int currentSeed;
+
+            for (int x = 0; x < universe.GetLength(0); x++)
+            {
+                for (int y = 0; y < universe.GetLength(1); y++)
+                {
+                    currentSeed = randCurrent.Next() % 4;
+                    if (currentSeed == 0)
+                    {
+                        universe[x, y] = true;
+                    }
+                    else
+                    {
+                        universe[x, y] = false;
+                    }
+                }
+            }
+            graphicsPanel1.Invalidate();
+        }
+
+        // Randomize Seed
+        private void fromSeedToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SeedInput input = new SeedInput();
+
+            if (DialogResult.OK == input.ShowDialog())
+            {
+                seed = input.GetSeed();
+            }
+            fromCurrentSeedToolStripMenuItem_Click(sender, e);
         }
     }
 }
