@@ -31,15 +31,15 @@ namespace GameOfLife
         8) Randomizing the universe --- COMPLETED!!!
         9) Saving current universe to a text file --- COMPLETED!!!
         10) USE VS VERSION CONTROL (GIT)  --- COMPLETED!!!
+        11) Open previously saved universe --- COMPLETED!!!
+        12) Controlling how many milliseconds between new generations --- COMPLETED!!!
+        13) Controlling current size of the universe --- COMPLETED!!!
+        14) Show current number of living cells --- COMPLETED!!!
+        15) View Menu Items (toggle on/off neighbor count, grid and HUD) --- COMPLETED!!!
 
                 TO-DO STUFF
 
         Basics
-        4) Open previously savd universe
-        5) Show current number of living cells
-        6) Controlling how many milliseconds between new generations
-        7) Controlling current size of the universe
-        8) View Menu Items (toggle on/off neighbor count, grid and HUD)
 
         Advanced
         1) Importaning patterns from Life Lexicon
@@ -47,7 +47,7 @@ namespace GameOfLife
         3) Universe Boundary behavior
         4) Context sensitive menu
         5) HUD
-        6) Settings (universe size, timer interval, color options, reload, reset)
+        6) Settings (universe size!, timer interval!, color options, reload, reset)
      */
 
     public partial class Form1 : Form
@@ -70,11 +70,11 @@ namespace GameOfLife
         Color gridColor = Color.Black;
         Color cellColor = Color.Yellow;
 
-        //Drawing labels
-        bool neighborDraw = true;
-
         // The Timer class
         Timer timer = new Timer();
+
+        // Milliseconds Interval
+        int milliInterval = 20;
 
         // Generation count
         int generations = 0;
@@ -82,14 +82,49 @@ namespace GameOfLife
         // Randomize the seed
         int seed = 0;
 
+        // If true, they're checked and shown
+        bool gridShow = true;
+        bool hudShow = true;
+        bool neighborDraw = true;
+
         public Form1()
         {
             InitializeComponent();
 
             // Setup the timer
-            timer.Interval = 100; // milliseconds
+            timer.Interval = milliInterval; // milliseconds
             timer.Tick += Timer_Tick;
             timer.Enabled = false; // start timer running
+
+            // Grid
+            if (gridShow == true)
+            {
+                gridVisibleToolStripMenuItem.Checked = true;
+            }
+            else
+            {
+                gridVisibleToolStripMenuItem.Checked = false;
+            }
+
+            // HUD
+            if (hudShow == true)
+            {
+                hUDToolStripMenuItem.Checked = true;
+            }
+            else
+            {
+                hUDToolStripMenuItem.Checked = false;
+            }
+
+            // Neighbor Count
+            if (neighborDraw == true)
+            {
+                neighborCountToolStripMenuItem.Checked = true;
+            }
+            else
+            {
+                neighborCountToolStripMenuItem.Checked = false;
+            }
 
             universe = new bool[nX, nY];
             scratchPad = new bool[nX, nY];
@@ -584,6 +619,7 @@ namespace GameOfLife
             graphicsPanel1.Invalidate();
         }
 
+        // Handles window form graphics
         private void graphicsPanel1_Paint(object sender, PaintEventArgs e)
         {
             // Calculate the width and height of each cell in pixels
@@ -617,8 +653,11 @@ namespace GameOfLife
                         e.Graphics.FillRectangle(cellBrush, cellRect);
                     }
 
-                    // Outline the cell with a pen
-                    e.Graphics.DrawRectangle(gridPen, cellRect.X, cellRect.Y, cellRect.Width, cellRect.Height);
+                    if (gridShow == true)
+                    {
+                        // Outline the cell with a pen
+                        e.Graphics.DrawRectangle(gridPen, cellRect.X, cellRect.Y, cellRect.Width, cellRect.Height);
+                    }
 
                     // Cell neighbor font
                     Font cellFont = new Font("Snap ITC", 10f);
@@ -639,7 +678,11 @@ namespace GameOfLife
             gridPen.Dispose();
             cellBrush.Dispose();
 
+            int liveCount = aliveCell();
+
             toolStripStatusLabelGenerations.Text = "Generations = " + generations.ToString();
+            Milliseconds.Text = "Milliseconds = " + milliInterval;
+            Cells.Text = "Cells = " + liveCount;
         }
 
         private void graphicsPanel1_MouseClick(object sender, MouseEventArgs e)
@@ -928,6 +971,69 @@ namespace GameOfLife
             }
 
             graphicsPanel1.Invalidate();
+        }
+
+        // Options dialog window
+        private void optionsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Options options = new Options();
+            options.SetInterval(milliInterval);
+
+            options.SetWidth(nX);
+            options.SetHeight(nY);
+
+            if (DialogResult.OK == options.ShowDialog())
+            {
+                milliInterval = options.GetInterval();
+                timer.Interval = milliInterval;
+
+                nX = options.GetWidth();
+                nY = options.GetHeight();
+
+                universe = new bool[nX, nY];
+                scratchPad = new bool[nX, nY];
+            }
+            graphicsPanel1.Invalidate();
+        }
+
+        // Grid Checked on/off
+        private void gridVisibleToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (gridVisibleToolStripMenuItem.Checked == false)
+            {
+                gridVisibleToolStripMenuItem.Checked = true;
+                gridShow = true;
+            }
+
+            else if (gridVisibleToolStripMenuItem.Checked == true)
+            {
+                gridVisibleToolStripMenuItem.Checked = false;
+                gridShow = false;
+            }
+
+            graphicsPanel1.Invalidate();
+        }
+
+        // HUD Checked on/off
+        private void hUDToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        // Neighbor Count Checked on/off
+        private void neighborCountToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (neighborCountToolStripMenuItem.Checked == false)
+            {
+                neighborCountToolStripMenuItem.Checked = true;
+                neighborDraw = true;
+            }
+
+            else if (neighborCountToolStripMenuItem.Checked == true)
+            {
+                neighborCountToolStripMenuItem.Checked = false;
+                neighborDraw = false;
+            }
         }
     }
 }
