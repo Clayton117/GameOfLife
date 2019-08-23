@@ -28,18 +28,18 @@ namespace GameOfLife
         5) Emptying universe --- COMPLETED!!!
         6) Show current generation strip --- COMPLETED!!!
         7) Display neighbor count in each cell --- COMPLETED!!!
+        8) Randomizing the universe --- COMPLETED!!!
+        9) Saving current universe to a text file --- COMPLETED!!!
+        10) USE VS VERSION CONTROL (GIT)  --- COMPLETED!!!
 
                 TO-DO STUFF
 
         Basics
-        1) Randomizing the universe
-        2) Saving current universe to a text file
-        3) USE VS VERSION CONTROL (GIT)
         4) Open previously savd universe
         5) Show current number of living cells
         6) Controlling how many milliseconds between new generations
         7) Controlling current size of the universe
-        8) View Menu Items (toggle on/off neighbor count, grid and HUD
+        8) View Menu Items (toggle on/off neighbor count, grid and HUD)
 
         Advanced
         1) Importaning patterns from Life Lexicon
@@ -880,12 +880,12 @@ namespace GameOfLife
                         continue;
                     }
 
-                    else
+                    else if (row[0] != '!')
                     {
                         maxHeight++;
                     }
 
-                    if (maxWidth != maxHeight)
+                    if (maxHeight != maxWidth)
                     {
                         maxWidth = maxHeight;
                     }
@@ -902,22 +902,24 @@ namespace GameOfLife
                 {
                     string row = reader.ReadLine();
 
-                    if (row[0] != '!')
+                    if (row[0] == '!')
                     {
                         continue;
                     }
-                    for (int xPos = 0; xPos < row.Length; xPos++)
+                    else
                     {
-                        if (row[xPos] == '&')
+                        for (int xPos = 0; xPos < row.Length; xPos++)
                         {
-                            universe[xPos, yPos] = true;
-                        }
-                        else if (row[xPos] == '.')
-                        {
-                            universe[xPos, yPos] = false;
+                            if (row[xPos] == '&')
+                            {
+                                universe[xPos, yPos] = true;
+                            }
+                            else if (row[xPos] == '.')
+                            {
+                                universe[xPos, yPos] = false;
+                            }
                         }
                     }
-                    
 
                     yPos++;
                 }
