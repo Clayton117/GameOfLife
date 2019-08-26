@@ -35,19 +35,17 @@ namespace GameOfLife
         12) Controlling how many milliseconds between new generations --- COMPLETED!!!
         13) Controlling current size of the universe --- COMPLETED!!!
         14) Show current number of living cells --- COMPLETED!!!
-        15) View Menu Items (toggle on/off neighbor count, grid and HUD) --- COMPLETED!!!
+        15) View Menu Items (toggle on/off neighbor count, grid and HUD) --- COMPLETED!!! 
+        16) HUD --- COMPLETED!!!
+        17) Game Colors
 
                 TO-DO STUFF
 
-        Basics
-
         Advanced
         1) Importaning patterns from Life Lexicon
-        2) Game Colors
         3) Universe Boundary behavior
         4) Context sensitive menu
-        5) HUD
-        6) Settings (universe size!, timer interval!, color options, reload, reset)
+        6) Settings (universe size!, timer interval!, !color options, !reload, reset)
      */
 
     public partial class Form1 : Form
@@ -67,8 +65,14 @@ namespace GameOfLife
         bool[,] scratchPad;
 
         // Drawing colors
-        Color gridColor = Color.Black;
-        Color cellColor = Color.Yellow;
+        Color GridColor;
+        Color CellColor;
+        Color BackgroundColor;
+
+        // Get/Set for colors
+        Color GridTemp;
+        Color CellTemp;
+        Color BGTemp;
 
         // The Timer class
         Timer timer = new Timer();
@@ -90,6 +94,7 @@ namespace GameOfLife
         public Form1()
         {
             InitializeComponent();
+            startSetting();
 
             // Setup the timer
             timer.Interval = milliInterval; // milliseconds
@@ -629,10 +634,10 @@ namespace GameOfLife
             int cellHeight = graphicsPanel1.ClientSize.Height / universe.GetLength(1);
 
             // A Pen for drawing the grid lines (color, width)
-            Pen gridPen = new Pen(gridColor, 1);
+            Pen gridPen = new Pen(GridColor, 1);
 
             // A Brush for filling living cells interiors (color)
-            Brush cellBrush = new SolidBrush(cellColor);
+            Brush cellBrush = new SolidBrush(CellColor);
 
             // Iterate through the universe in the y, top to bottom
             for (int y = 0; y < universe.GetLength(1); y++)
@@ -641,7 +646,7 @@ namespace GameOfLife
                 for (int x = 0; x < universe.GetLength(0); x++)
                 {
                     // A rectangle to represent each cell in pixels
-                    Rectangle cellRect = Rectangle.Empty;
+                    RectangleF cellRect = RectangleF.Empty;
                     cellRect.X = x * cellWidth;
                     cellRect.Y = y * cellHeight;
                     cellRect.Width = cellWidth;
@@ -679,6 +684,25 @@ namespace GameOfLife
             cellBrush.Dispose();
 
             int liveCount = aliveCell();
+
+            Font HUDfont = new Font("Snap ITC", 10);
+            StringFormat HUDform = new StringFormat();
+            HUDform.LineAlignment = StringAlignment.Center;
+
+            if (hudShow == true)
+            {
+                string HUDtext = "Generations = " + generations;
+                e.Graphics.DrawString(HUDtext, HUDfont, Brushes.Red, 10, graphicsPanel1.ClientSize.Height -90, HUDform);
+
+                HUDtext = "Cell Count = " + liveCount;
+                e.Graphics.DrawString(HUDtext, HUDfont, Brushes.Red, 10, graphicsPanel1.ClientSize.Height -70, HUDform);
+
+                HUDtext = "Boundary Type = " + boundaryType;
+                e.Graphics.DrawString(HUDtext, HUDfont, Brushes.Red, 10, graphicsPanel1.ClientSize.Height -50, HUDform);
+
+                HUDtext = "Universe Size = {Width: " + nX + ", Height: " + nY + "}";
+                e.Graphics.DrawString(HUDtext, HUDfont, Brushes.Red, 10, graphicsPanel1.ClientSize.Height -30, HUDform);
+            }
 
             toolStripStatusLabelGenerations.Text = "Generations = " + generations.ToString();
             Milliseconds.Text = "Milliseconds = " + milliInterval;
@@ -1017,7 +1041,19 @@ namespace GameOfLife
         // HUD Checked on/off
         private void hUDToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            if (hUDToolStripMenuItem.Checked == false)
+            {
+                hUDToolStripMenuItem.Checked = true;
+                hudShow = true;
+            }
 
+            else if (hUDToolStripMenuItem.Checked == true)
+            {
+                hUDToolStripMenuItem.Checked = false;
+                hudShow = false;
+            }
+
+            graphicsPanel1.Invalidate();
         }
 
         // Neighbor Count Checked on/off
@@ -1035,5 +1071,139 @@ namespace GameOfLife
                 neighborDraw = false;
             }
         }
+
+        // Reset
+        private void resetToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Properties.Settings.Default.Reset();
+            startSetting();
+
+            graphicsPanel1.Invalidate();
+        }
+
+        // Reload 
+        private void reloadToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Properties.Settings.Default.Reload();
+            startSetting();
+
+            graphicsPanel1.Invalidate();
+        }
+
+        // Start and finish setting functions are for Reset and Reload
+        private void startSetting()
+        {
+            BackgroundColor = Properties.Settings.Default.BGDefault;
+            GridColor = Properties.Settings.Default.GridDefault;
+            CellColor = Properties.Settings.Default.CellDefault;
+
+            milliInterval = Properties.Settings.Default.MilliDefault;
+            nX = Properties.Settings.Default.WidthDefault;
+            nY = Properties.Settings.Default.HeightDefault;
+
+            gridShow = Properties.Settings.Default.GridDrawDefault;
+            hudShow = Properties.Settings.Default.HUDDrawDefault;
+            neighborDraw = Properties.Settings.Default.NCDefault;
+            boundaryType = Properties.Settings.Default.BoundarytypeDefault;
+        }
+
+        private void finishSetting()
+        {
+            Properties.Settings.Default.BGDefault = BackgroundColor;
+            Properties.Settings.Default.GridDefault = GridColor;
+            Properties.Settings.Default.CellDefault = CellColor;
+
+            Properties.Settings.Default.MilliDefault = milliInterval;
+            Properties.Settings.Default.WidthDefault = nX;
+            Properties.Settings.Default.HeightDefault = nY;
+
+            Properties.Settings.Default.GridDrawDefault = gridShow;
+            Properties.Settings.Default.HUDDrawDefault = hudShow;
+            Properties.Settings.Default.NCDefault = neighborDraw;
+            Properties.Settings.Default.BoundarytypeDefault = boundaryType;
+        }
+
+        private void Forms1_formClosed(object sender, FormClosedEventArgs e)
+        {
+            finishSetting();
+            Properties.Settings.Default.Save();
+        }
+
+        // Background Color
+        private void backColorToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ColorDialog background = new ColorDialog();
+
+            background.Color = BackgroundColor;
+            if (DialogResult.OK == background.ShowDialog())
+            {
+                BackgroundColor = background.Color;
+                SetBGColor(BackgroundColor);
+                graphicsPanel1.BackColor = GetBGColor();
+            }
+
+            graphicsPanel1.Invalidate();
+        }
+
+        private Color GetBGColor()
+        {
+            return BGTemp;
+        }
+        private void SetBGColor(Color color)
+        {
+            BGTemp = color;
+            BackgroundColor = color;
+        }
+
+        // Cell Color
+        private void cellColorToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ColorDialog cell = new ColorDialog();
+
+            cell.Color = CellColor;
+            if (DialogResult.OK == cell.ShowDialog())
+            {
+                CellColor = cell.Color;
+                SetCellColor(CellColor);
+            }
+
+            graphicsPanel1.Invalidate();
+        }
+
+        private Color GetCellColor()
+        {
+            return CellTemp;
+        }
+        private void SetCellColor(Color color)
+        {
+            CellTemp = color;
+            CellColor = color;
+        }
+
+
+        // Grid Color
+        private void gridColorToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ColorDialog grid = new ColorDialog();
+
+            if (DialogResult.OK == grid.ShowDialog())
+            {
+                GridColor = grid.Color;
+                SetGridColor(GridColor);
+            }
+
+            graphicsPanel1.Invalidate();
+        }
+
+        private Color GetGridColor()
+        {
+            return GridTemp;
+        }
+        private void SetGridColor(Color color)
+        {
+            GridTemp = color;
+            GridColor = GridTemp;
+        }
+
     }
 }
