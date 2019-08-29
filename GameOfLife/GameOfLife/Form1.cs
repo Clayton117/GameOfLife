@@ -11,43 +11,6 @@ using System.IO;
 
 namespace GameOfLife
 {
-    /* COMPLETED STUFF!!
-       
-        1) Finish neighborCount function --- COMPLETED!!
-        2) Set up buttons: --- COMPLETED!!
-           New <---- Empties the universe, oviously
-           Start
-           Pause
-           Next
-        3) Make sure that all rules apply when application starts    --- COMPLETED!!!
-           A -- Living cells with less than 2 living neighbors die in the next generation
-           B -- Living cells with more than 3 living neighbors die in the next generation
-           C -- Living cells with 2 or 3 living neighbors live in the next generation
-           D -- Dead cells with exactly 3 living neighbors live in the next generation
-        4) Fix grid --- COMPLETED!!!
-        5) Emptying universe --- COMPLETED!!!
-        6) Show current generation strip --- COMPLETED!!!
-        7) Display neighbor count in each cell --- COMPLETED!!!
-        8) Randomizing the universe --- COMPLETED!!!
-        9) Saving current universe to a text file --- COMPLETED!!!
-        10) USE VS VERSION CONTROL (GIT)  --- COMPLETED!!!
-        11) Open previously saved universe --- COMPLETED!!!
-        12) Controlling how many milliseconds between new generations --- COMPLETED!!!
-        13) Controlling current size of the universe --- COMPLETED!!!
-        14) Show current number of living cells --- COMPLETED!!!
-        15) View Menu Items (toggle on/off neighbor count, grid and HUD) --- COMPLETED!!! 
-        16) HUD --- COMPLETED!!!
-        17) Game Colors
-
-                TO-DO STUFF
-
-        Advanced
-        1) Importaning patterns from Life Lexicon
-        3) Universe Boundary behavior
-        4) Context sensitive menu
-        6) Settings (universe size!, timer interval!, !color options, !reload, reset)
-     */
-
     public partial class Form1 : Form
     {
         // Coordinates
