@@ -11,6 +11,43 @@ using System.IO;
 
 namespace GameOfLife
 {
+    /* COMPLETED STUFF!!
+       
+        1) Finish neighborCount function --- COMPLETED!!
+        2) Set up buttons: --- COMPLETED!!
+           New <---- Empties the universe, oviously
+           Start
+           Pause
+           Next
+        3) Make sure that all rules apply when application starts    --- COMPLETED!!!
+           A -- Living cells with less than 2 living neighbors die in the next generation
+           B -- Living cells with more than 3 living neighbors die in the next generation
+           C -- Living cells with 2 or 3 living neighbors live in the next generation
+           D -- Dead cells with exactly 3 living neighbors live in the next generation
+        4) Fix grid --- COMPLETED!!!
+        5) Emptying universe --- COMPLETED!!!
+        6) Show current generation strip --- COMPLETED!!!
+        7) Display neighbor count in each cell --- COMPLETED!!!
+        8) Randomizing the universe --- COMPLETED!!!
+        9) Saving current universe to a text file --- COMPLETED!!!
+        10) USE VS VERSION CONTROL (GIT)  --- COMPLETED!!!
+        11) Open previously saved universe --- COMPLETED!!!
+        12) Controlling how many milliseconds between new generations --- COMPLETED!!!
+        13) Controlling current size of the universe --- COMPLETED!!!
+        14) Show current number of living cells --- COMPLETED!!!
+        15) View Menu Items (toggle on/off neighbor count, grid and HUD) --- COMPLETED!!! 
+        16) HUD --- COMPLETED!!!
+        17) Game Colors
+
+                TO-DO STUFF
+
+        Advanced
+        1) Importaning patterns from Life Lexicon
+        3) Universe Boundary behavior
+        4) Context sensitive menu
+        6) Settings (universe size!, timer interval!, !color options, !reload, reset)
+     */
+
     public partial class Form1 : Form
     {
         // Coordinates
@@ -52,12 +89,7 @@ namespace GameOfLife
         // If true, they're checked and shown
         bool gridShow = true;
         bool hudShow = true;
-        bool neighborShow = true;
-        bool finiteShow = true;
-        bool toroidalShow = true;
-
-        // Strings for finite
-        string Finite;
+        bool neighborDraw = true;
 
         public Form1()
         {
@@ -90,22 +122,13 @@ namespace GameOfLife
             }
 
             // Neighbor Count
-            if (neighborShow == true)
+            if (neighborDraw == true)
             {
                 neighborCountToolStripMenuItem.Checked = true;
             }
             else
             {
                 neighborCountToolStripMenuItem.Checked = false;
-            }
-
-            if (boundaryType == true)
-            {
-                Finite = "Finite";
-            }
-            else if (boundaryType == false)
-            {
-                Finite = "Toroidal";
             }
 
             universe = new bool[nX, nY];
@@ -221,7 +244,6 @@ namespace GameOfLife
                         {
                             if (a == 0 && b == 0)
                             {
-
                                 switch (x)
                                 {
                                     case 1:
@@ -533,10 +555,6 @@ namespace GameOfLife
                     }
                 }
             }
-            else if(boundaryType == false) // false = toroidal 
-            {
-                
-            }
             return neighborAmount;
         }
 
@@ -654,7 +672,7 @@ namespace GameOfLife
                     stringformat.LineAlignment = StringAlignment.Center; // LineAlignment = vertical align
 
                     int neighborFont = neighborCount(x, y);
-                    if (neighborFont > 0 && neighborShow == true)
+                    if (neighborFont > 0 && neighborDraw == true)
                     {
                         e.Graphics.DrawString(neighborFont.ToString(), cellFont, Brushes.Black, cellRect, stringformat);
                     }
@@ -679,7 +697,7 @@ namespace GameOfLife
                 HUDtext = "Cell Count = " + liveCount;
                 e.Graphics.DrawString(HUDtext, HUDfont, Brushes.Red, 10, graphicsPanel1.ClientSize.Height -70, HUDform);
 
-                HUDtext = "Boundary Type = " + Finite;
+                HUDtext = "Boundary Type = " + boundaryType;
                 e.Graphics.DrawString(HUDtext, HUDfont, Brushes.Red, 10, graphicsPanel1.ClientSize.Height -50, HUDform);
 
                 HUDtext = "Universe Size = {Width: " + nX + ", Height: " + nY + "}";
@@ -691,7 +709,6 @@ namespace GameOfLife
             Cells.Text = "Cells = " + liveCount;
         }
 
-        // Click to make cell alive or dead
         private void graphicsPanel1_MouseClick(object sender, MouseEventArgs e)
         {
             // If the left mouse button was clicked
@@ -717,6 +734,12 @@ namespace GameOfLife
             }
         }
 
+        // Exit
+        private void exitToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Environment.Exit(0);
+        }
+
         /*
         // Accidental copy for New in File Menu
         private void newToolStripMenuItem_Click(object sender, EventArgs e)
@@ -739,12 +762,6 @@ namespace GameOfLife
             graphicsPanel1.Invalidate();
         }
         */
-
-        // Exit
-        private void exitToolStripMenuItem_Click_1(object sender, EventArgs e)
-        {
-            Environment.Exit(0);
-        }
 
         // Next button
         private void toolStripButtonNext_Click(object sender, EventArgs e)
@@ -907,42 +924,6 @@ namespace GameOfLife
             }
         }
 
-        // Save button
-        private void saveToolStripButton_Click(object sender, EventArgs e)
-        {
-            SaveFileDialog saveAs = new SaveFileDialog();
-            saveAs.Filter = "All Files|*.*|Cells|*.Cells";
-            saveAs.FilterIndex = 2;
-            saveAs.DefaultExt = "Cells";
-
-            if (DialogResult.OK == saveAs.ShowDialog())
-            {
-                StreamWriter writer = new StreamWriter(saveAs.FileName);
-                writer.WriteLine("!This is a test");
-
-                for (int y = 0; y < universe.GetLength(1); y++)
-                {
-                    string thisRow = string.Empty;
-
-                    for (int x = 0; x < universe.GetLength(0); x++)
-                    {
-                        if (universe[x, y] == true)
-                        {
-                            thisRow += "&";
-                        }
-                        else if (universe[x, y] == false)
-                        {
-                            thisRow += ".";
-                        }
-                    }
-
-                    writer.WriteLine(thisRow);
-                }
-
-                writer.Close();
-            }
-        }
-
         // Open in File Menu
         private void openToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -979,136 +960,6 @@ namespace GameOfLife
 
                 universe = new bool[maxWidth, maxHeight];
                 scratchPad = new bool[maxWidth, maxHeight];
-
-                reader.BaseStream.Seek(0, SeekOrigin.Begin);
-
-                int yPos = 0;
-
-                while (!reader.EndOfStream)
-                {
-                    string row = reader.ReadLine();
-
-                    if (row[0] == '!')
-                    {
-                        continue;
-                    }
-                    else
-                    {
-                        for (int xPos = 0; xPos < row.Length; xPos++)
-                        {
-                            if (row[xPos] == '&')
-                            {
-                                universe[xPos, yPos] = true;
-                            }
-                            else if (row[xPos] == '.')
-                            {
-                                universe[xPos, yPos] = false;
-                            }
-                        }
-                    }
-
-                    yPos++;
-                }
-
-                reader.Close();
-            }
-
-            graphicsPanel1.Invalidate();
-        }
-
-        // Open button
-        private void openToolStripButton_Click(object sender, EventArgs e)
-        {
-            OpenFileDialog open = new OpenFileDialog();
-            open.Filter = "All Files|*.*|Cells|*.Cells";
-            open.FilterIndex = 2;
-
-            if (DialogResult.OK == open.ShowDialog())
-            {
-                StreamReader reader = new StreamReader(open.FileName);
-
-                int maxWidth = 0;
-                int maxHeight = 0;
-
-                while (!reader.EndOfStream)
-                {
-                    string row = reader.ReadLine();
-
-                    if (row[0] == '!')
-                    {
-                        continue;
-                    }
-
-                    else if (row[0] != '!')
-                    {
-                        maxHeight++;
-                    }
-
-                    if (maxHeight != maxWidth)
-                    {
-                        maxWidth = maxHeight;
-                    }
-                }
-
-                universe = new bool[maxWidth, maxHeight];
-                scratchPad = new bool[maxWidth, maxHeight];
-
-                reader.BaseStream.Seek(0, SeekOrigin.Begin);
-
-                int yPos = 0;
-
-                while (!reader.EndOfStream)
-                {
-                    string row = reader.ReadLine();
-
-                    if (row[0] == '!')
-                    {
-                        continue;
-                    }
-                    else
-                    {
-                        for (int xPos = 0; xPos < row.Length; xPos++)
-                        {
-                            if (row[xPos] == '&')
-                            {
-                                universe[xPos, yPos] = true;
-                            }
-                            else if (row[xPos] == '.')
-                            {
-                                universe[xPos, yPos] = false;
-                            }
-                        }
-                    }
-
-                    yPos++;
-                }
-
-                reader.Close();
-            }
-
-            graphicsPanel1.Invalidate();
-        }
-
-        // Import in Menu File
-        private void importToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            OpenFileDialog open = new OpenFileDialog();
-            open.Filter = "All Files|*.*|Cells|*.Cells";
-            open.FilterIndex = 2;
-
-            if (DialogResult.OK == open.ShowDialog())
-            {
-                StreamReader reader = new StreamReader(open.FileName);
-
-                while (!reader.EndOfStream)
-                {
-                    string row = reader.ReadLine();
-
-                    if (row[0] == '!')
-                    {
-                        continue;
-                    }
-                }
 
                 reader.BaseStream.Seek(0, SeekOrigin.Begin);
 
@@ -1211,13 +1062,13 @@ namespace GameOfLife
             if (neighborCountToolStripMenuItem.Checked == false)
             {
                 neighborCountToolStripMenuItem.Checked = true;
-                neighborShow = true;
+                neighborDraw = true;
             }
 
             else if (neighborCountToolStripMenuItem.Checked == true)
             {
                 neighborCountToolStripMenuItem.Checked = false;
-                neighborShow = false;
+                neighborDraw = false;
             }
         }
 
@@ -1236,14 +1087,13 @@ namespace GameOfLife
             Properties.Settings.Default.Reload();
             startSetting();
 
-            //graphicsPanel1.Invalidate();
+            graphicsPanel1.Invalidate();
         }
 
         // Start and finish setting functions are for Reset and Reload
         private void startSetting()
         {
             BackgroundColor = Properties.Settings.Default.BGDefault;
-            graphicsPanel1.BackColor = BackgroundColor;
             GridColor = Properties.Settings.Default.GridDefault;
             CellColor = Properties.Settings.Default.CellDefault;
 
@@ -1253,10 +1103,8 @@ namespace GameOfLife
 
             gridShow = Properties.Settings.Default.GridDrawDefault;
             hudShow = Properties.Settings.Default.HUDDrawDefault;
-            neighborShow = Properties.Settings.Default.NCDefault;
+            neighborDraw = Properties.Settings.Default.NCDefault;
             boundaryType = Properties.Settings.Default.BoundarytypeDefault;
-
-            graphicsPanel1.Invalidate();
         }
 
         private void finishSetting()
@@ -1271,7 +1119,7 @@ namespace GameOfLife
 
             Properties.Settings.Default.GridDrawDefault = gridShow;
             Properties.Settings.Default.HUDDrawDefault = hudShow;
-            Properties.Settings.Default.NCDefault = neighborShow;
+            Properties.Settings.Default.NCDefault = neighborDraw;
             Properties.Settings.Default.BoundarytypeDefault = boundaryType;
         }
 
@@ -1290,10 +1138,8 @@ namespace GameOfLife
             if (DialogResult.OK == background.ShowDialog())
             {
                 BackgroundColor = background.Color;
-                BGTemp = GetBGColor();
-                SetBGColor(BGTemp);
+                SetBGColor(BackgroundColor);
                 graphicsPanel1.BackColor = GetBGColor();
-                Properties.Settings.Default.BGDefault = BGTemp;
             }
 
             graphicsPanel1.Invalidate();
@@ -1301,12 +1147,12 @@ namespace GameOfLife
 
         private Color GetBGColor()
         {
-            return BackgroundColor;
+            return BGTemp;
         }
         private void SetBGColor(Color color)
         {
             BGTemp = color;
-            BackgroundColor = BGTemp;
+            BackgroundColor = color;
         }
 
         // Cell Color
@@ -1319,7 +1165,6 @@ namespace GameOfLife
             {
                 CellColor = cell.Color;
                 SetCellColor(CellColor);
-                CellTemp = GetCellColor();
             }
 
             graphicsPanel1.Invalidate();
@@ -1327,7 +1172,7 @@ namespace GameOfLife
 
         private Color GetCellColor()
         {
-            return CellColor;
+            return CellTemp;
         }
         private void SetCellColor(Color color)
         {
@@ -1345,7 +1190,6 @@ namespace GameOfLife
             {
                 GridColor = grid.Color;
                 SetGridColor(GridColor);
-                GridTemp = GetGridColor();
             }
 
             graphicsPanel1.Invalidate();
@@ -1353,7 +1197,7 @@ namespace GameOfLife
 
         private Color GetGridColor()
         {
-            return GridColor;
+            return GridTemp;
         }
         private void SetGridColor(Color color)
         {
@@ -1361,49 +1205,5 @@ namespace GameOfLife
             GridColor = GridTemp;
         }
 
-
-        // Finite checked on/off
-        private void finiteToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            if (finiteToolStripMenuItem.Checked == false)
-            {
-                toroidalToolStripMenuItem.Checked = false;
-                finiteToolStripMenuItem.Checked = true;
-                finiteShow = true;
-                Finite = "Finite";
-            }
-
-            else if (finiteToolStripMenuItem.Checked == true)
-            {
-                toroidalToolStripMenuItem.Checked = true;
-                finiteToolStripMenuItem.Checked = false;
-                finiteShow = false;
-                Finite = "Toroidal";
-            }
-
-            graphicsPanel1.Invalidate();
-        }
-
-        // Toroidal checked on/off
-        private void toroidalToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            if (toroidalToolStripMenuItem.Checked == false)
-            {
-                finiteToolStripMenuItem.Checked = false;
-                toroidalToolStripMenuItem.Checked = true;
-                toroidalShow = true;
-                Finite = "Toroidal";
-            }
-
-            else if (toroidalToolStripMenuItem.Checked == true)
-            {
-                finiteToolStripMenuItem.Checked = true;
-                toroidalToolStripMenuItem.Checked = false;
-                toroidalShow = false;
-                Finite = "Finite";
-            }
-
-            graphicsPanel1.Invalidate();
-        }
     }
 }
